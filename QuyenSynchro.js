@@ -12,7 +12,7 @@ function createQuyenSynchroList(){
   data.push(sourceValues[0]);
 
   for(var i=0;i<quyenSynchroColumns.length;i++){
-    addToQuyenSynchroList(quyenSynchroColumns[i],quyenSynchroCategories[i],quyenSynchroTeamColumns[i], sourceValues, data);
+    addToQuyenSynchroList(quyenSynchroColumns[i]/*,quyenSynchroCategories[i]*/,quyenSynchroTeamColumns[i], sourceValues, data);
   }
 
   quyenSynchroSheet.getRange(1, 1, data.length, data[0].length).setValues(data);
@@ -64,7 +64,18 @@ function sortByClubAndTeam(dataToSort, teamColumn){
   return sorted;
 }
 
-function addToQuyenSynchroList(column, categories, teamColumn, sourceValues, data){
+function addToQuyenSynchroList(column, /*categories,*/ teamColumn, sourceValues, data){
+  var categories = [];
+  //get all categories
+  for(var i=1;i<sourceValues.length;i++){
+    var category = sourceValues[i][column];
+    //check if category starts with a K
+    if(category.startsWith('K')){
+      if(categories.indexOf(category) == -1){
+        categories.push(category);
+      }
+    }
+  }
 
   //todo group by synchro teams
 

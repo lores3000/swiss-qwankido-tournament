@@ -41,7 +41,7 @@ var songLuyenColumns = [12,19,28];//['M','T','AC'];
 var songLuyenTeamColumns = [13,20,30];//['N','U','AE'];
 var songLuyenWeaponColumns = [null,null,29];//[null,null,'AD']
 //unused atm: 'E', 'F', 'AF'
-
+/*
 var quyenKidsCategories = []/*['A (7 – 8 Jahre bis 2. Cap Rot)',
   'B (9 – 10 Jahre bis 2. Cap Rot)',
   'C (11 – 12 Jahre bis 2. Cap Rot)',
@@ -49,7 +49,7 @@ var quyenKidsCategories = []/*['A (7 – 8 Jahre bis 2. Cap Rot)',
   'D (7 – 8 Jahre ab 3. Cap Rot)',
   'E (9 – 10 Jahre ab 3. Cap Rot)',
   'F (11 – 12 Jahre ab 3. Cap Rot)',
-];*/
+];*//*
 var quyenAdultCategories = ['Erwachsene A (ab 16 Jahre bis 4. Cap Blau nur Männer)',
   'Erwachsene B (ab 16 Jahre bis 4. Cap Blau nur Frauen)',
   'Erwachsene C (ab 18 Jahre ab CN nur Männer)',
@@ -120,7 +120,7 @@ var combatWeaponsCategories = [
 ]
 
 var combatCategories = [combatKidsCategories,combatAdultCategories, combatWeaponsCategories]
-
+*/
 var appSheet = SpreadsheetApp.getActiveSpreadsheet(); //app stuff
 var appFile = DriveApp.getFileById(appSheet.getId());
 var appFolder = appFile.getParents().next();
