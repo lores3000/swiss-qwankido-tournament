@@ -22,8 +22,11 @@ var birthdateColum = 'C'
 
 var genderColumn = 'B'
 var nameColumn = 'D'
+var nameColumnId = 0;//'D'
 
-var clubColumn = 0;//'A'
+var clubColumn = 'F';//'A'
+var clubColumnId = 0;//'A'
+
 var quyenColumns = [7,14,21,23] ;//['H','O','V','X']
 var quyenWeaponColumns = [null,null,'W','Y']
 
@@ -150,6 +153,9 @@ function init(replacesheet){
   birthdateColum = config[1][column++]
   nameColumn = config[1][column++]
   clubColumn = config[1][column++]
+
+  nameColumnId = nameColumn.charCodeAt(0) - 65;
+  clubColumnId = clubColumn.charCodeAt(0) - 65;
 
   var startRow = 5;
   quyenColumns = fillArray(config, 0, startRow);
