@@ -19,7 +19,7 @@ function createCombatLists(){
   tournamentData.push(combatHeader);
 
   for(var i=0;i<combatColumns.length;i++){
-    addToCombatList(combatColumns[i], /*combatCategories[i],*/ sourceValues, data,tournamentData);
+    addToCombatList(combatColumns[i], combatTeamColumns[i], /*combatCategories[i],*/ sourceValues, data,tournamentData);
   }
 
   //Zeilen und Spalten 'drehen' //falsch -> eine Reihe sollte ein Eintrag sein - braucht noch Spaltenkopf!
@@ -31,7 +31,7 @@ function createCombatLists(){
   createCombatSerialLetter(tournamentData);
 }
 
-function addToCombatList(column, /*categories,*/ sourceValues, data, tournamentData){
+function addToCombatList(column, teamColumn, /*categories,*/ sourceValues, data, tournamentData){
   var categories = [];
   //get all categories
   for(var i=1;i<sourceValues.length;i++){
@@ -67,11 +67,11 @@ function addToCombatList(column, /*categories,*/ sourceValues, data, tournamentD
       data.push(tmpData[j]);
     }
     data.push(dataEmpty);
-    createTournamentData(categories[i], tmpData, tournamentData);
+    createTournamentData(categories[i], teamColumn, tmpData, tournamentData);
   }
 }
 
-function createTournamentData(category, fightersIn, tournamentData){
+function createTournamentData(category, teamColumn, fightersIn, tournamentData){
   var fighters = [];
   var teams = [];
   //todo get Team from table
@@ -80,7 +80,7 @@ function createTournamentData(category, fightersIn, tournamentData){
   var row = tournamentData.length-1;
 
   for(var i=0;i<fightersIn.length;i++){
-    fighters.push([fightersIn[i][nameColumnId],[fightersIn[i][clubColumnId]+' - '+fightersIn[i][nameColumnId]]]); //name & displayname for list
+    fighters.push([fightersIn[i][nameColumnId],[fightersIn[i][clubColumnId]+' - '+fightersIn[i][teamColumn]+' - '+fightersIn[i][nameColumnId]]]); //name & displayname for list
   }
 
   if(fighters.length%2 == 0){
@@ -97,10 +97,10 @@ function createTournamentData(category, fightersIn, tournamentData){
     for(var i=0;i<fightersIn.length;i++){
       var ignore = false;
       for(var j=0;j<teams.length;j++){
-        if(teams[j][0] == fightersIn[i][0]){
+        if(teams[j][0] == fightersIn[i][teamColumn]){
           hasTeams = true;
           membercount[j]+=1;
-          teams[j][1].push(fighters[i][1][0]);
+          teams[j][1].push(fighters[i][1][teamColumn]);
           ignore = true;
         }
       }
@@ -365,12 +365,16 @@ function createCombatSerialLetter(tournamentData){
       replacementBody.replaceText('{'+search+'}', replace);  
     }
 
-    if(row!= tournamentData.length-1){
+    //if(row!= tournamentData.length-1){
       replacementBody.appendPageBreak();
-    }
-
+    //}
     copyBody(replacementBody, body);
   }
+
+  //add one more copy (last page has graphic multiplied...)
+  var replacementBody = bodyCopy.copy();
+  replacementBody.appendPageBreak();
+  copyBody(replacementBody, body);
 
   doc.saveAndClose();
 }
