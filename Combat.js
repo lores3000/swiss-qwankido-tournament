@@ -28,7 +28,7 @@ function createCombatLists(){
   combatSheet.getRange(1, 1, data.length, data[0].length).setValues(data);
   combatTournamentSheet.getRange(1, 1, tournamentData.length, tournamentData[0].length).setValues(tournamentData);
 
-  createCombatSerialLetter(tournamentData);
+  createSerialLetter('1Pp8Mi8YfxQ9VOLXX9z7AZOxssaHucmHbi9FC51kZzoI','Combat',tournamentData, true);
 }
 
 function addToCombatList(column, teamColumn, /*categories,*/ sourceValues, data, tournamentData){
@@ -328,53 +328,3 @@ function createCombatSerialLetter(tournamentData){
     //copyBody(replacementBody, body);
 }*/
 
-//from page
-function createCombatSerialLetter(tournamentData){
-
-  const templateCombatDoc = DriveApp.getFileById('1Pp8Mi8YfxQ9VOLXX9z7AZOxssaHucmHbi9FC51kZzoI');
-
-  var files = appFolder.getFilesByName("Kämpfe");
-  while (files.hasNext()) {//If there is another element in the iterator
-    var thisFile = files.next();
-    thisFile.setTrashed(true);
-  };
-
-  const newCombatDoc = templateCombatDoc.makeCopy(appFolder);
-  newCombatDoc.setName("Kämpfe");
-
-  var columnHeaders = tournamentData[0];
-  
-
-  const doc = DocumentApp.openById(newCombatDoc.getId());
-  const body = doc.getBody();
-
-  var bodyCopy = body.copy();
-  body.clear();
-  body.appendPageBreak();
-
-  //body.clear();
-  for(var row=1;row<tournamentData.length;row++){
-    var replacementBody = bodyCopy.copy();
-
-    for(var column=0;column<columnHeaders.length;column++){
-      var search = columnHeaders[column];
-      var rowdata = tournamentData[row];
-      
-      var replace = rowdata[column]? rowdata[column] : "";
-
-      replacementBody.replaceText('{'+search+'}', replace);  
-    }
-
-    //if(row!= tournamentData.length-1){
-      replacementBody.appendPageBreak();
-    //}
-    copyBody(replacementBody, body);
-  }
-
-  //add one more copy (last page has graphic multiplied...)
-  var replacementBody = bodyCopy.copy();
-  replacementBody.appendPageBreak();
-  copyBody(replacementBody, body);
-
-  doc.saveAndClose();
-}

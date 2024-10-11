@@ -35,3 +35,57 @@ function createOrReplaceSheet(name){
     sheet = spreadsheet.insertSheet(name);
     return sheet;
 }
+
+
+//from text document template page
+function createSerialLetter(templateId, documentName, tournamentData, addExtraPage){
+
+  const templateCombatDoc = DriveApp.getFileById(templateId);
+
+  var files = appFolder.getFilesByName(documentName);
+  while (files.hasNext()) {//If there is another element in the iterator
+    var thisFile = files.next();
+    thisFile.setTrashed(true);
+  };
+
+  const newCombatDoc = templateCombatDoc.makeCopy(appFolder);
+  newCombatDoc.setName(documentName);
+
+  var columnHeaders = tournamentData[0];
+  
+
+  const doc = DocumentApp.openById(newCombatDoc.getId());
+  const body = doc.getBody();
+
+  var bodyCopy = body.copy();
+  body.clear();
+  body.appendPageBreak();
+
+  //body.clear();
+  for(var row=1;row<tournamentData.length;row++){
+    var replacementBody = bodyCopy.copy();
+
+    for(var column=0;column<columnHeaders.length;column++){
+      var search = columnHeaders[column];
+      var rowdata = tournamentData[row];
+      
+      var replace = rowdata[column]? rowdata[column] : "";
+
+      replacementBody.replaceText('{'+search+'}', replace);  
+    }
+
+    //if(row!= tournamentData.length-1){
+      replacementBody.appendPageBreak();
+    //}
+    copyBody(replacementBody, body);
+  }
+
+  if(addExtraPage){
+    //add one more copy (last page has graphic multiplied...)
+    var replacementBody = bodyCopy.copy();
+    replacementBody.appendPageBreak();
+    copyBody(replacementBody, body);
+  }
+
+  doc.saveAndClose();
+}
