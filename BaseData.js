@@ -27,6 +27,9 @@ var nameColumnId = 0;//'D'
 var clubColumn = 'F';//'A'
 var clubColumnId = 0;//'A'
 
+var rankColumn = 'G';//'G'
+var rankColumnId = 0;//'G'
+
 var quyenColumns = [7,14,21,23] ;//['H','O','V','X']
 var quyenWeaponColumns = [null,null,'W','Y']
 
@@ -156,6 +159,7 @@ function init(replacesheet){
 
   nameColumnId = nameColumn.charCodeAt(0) - 65;
   clubColumnId = clubColumn.charCodeAt(0) - 65;
+  rankColumnId = rankColumn.charCodeAt(0) - 65;
 
   var startRow = 5;
   quyenColumns = fillArray(config, 0, startRow);
