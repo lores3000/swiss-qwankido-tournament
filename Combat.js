@@ -80,7 +80,7 @@ function createTournamentData(category, teamColumn, fightersIn, tournamentData){
   var row = tournamentData.length-1;
 
   for(var i=0;i<fightersIn.length;i++){
-    fighters.push([fightersIn[i][nameColumnId],[fightersIn[i][clubColumnId]+' - '+fightersIn[i][teamColumn]+' - '+fightersIn[i][nameColumnId]]]); //name & displayname for list
+    fighters.push([fightersIn[i][nameColumnId],fightersIn[i][clubColumnId]+' - '+fightersIn[i][teamColumn]+' - '+fightersIn[i][nameColumnId]]); //name & displayname for list
   }
 
   if(fighters.length%2 == 0){

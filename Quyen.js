@@ -1,7 +1,7 @@
-var maxFightersPerGroup = 14;
+var maxEntriesPerSheet = 14;
 
 //create headers for 14 fighters
-var header = ["Category",
+var sheetHeader = ["Category",
   "Fighter1 Name", "Fighter1 Rank",
   "Fighter2 Name", "Fighter2 Rank",
   "Fighter3 Name", "Fighter3 Rank",
@@ -32,7 +32,7 @@ function createQuyenLists(){
   var tournamentData = [];
 
   data.push(sourceValues[0]);
-  tournamentData.push(header);
+  tournamentData.push(sheetHeader);
 
   for(var i=0;i<quyenColumns.length;i++){
     addToQuyenList(quyenColumns[i]/*,quyenCategories[i]*/, sourceValues, data, tournamentData);
@@ -82,7 +82,7 @@ function addToQuyenList(column, /*categories,*/ sourceValues, data, tournamentDa
       data.push(tmpData[j]);
     }
 
-    for(var j=tmpData.length;j<maxFightersPerGroup;j++){
+    for(var j=tmpData.length;j<maxEntriesPerSheet;j++){
       tournamentDataEntry.push([]);
       tournamentDataEntry.push([]);
     }
