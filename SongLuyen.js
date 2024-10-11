@@ -1,3 +1,22 @@
+var maxSongLuyenTeamsPerSheet = 7;
+
+//create headers for 14 fighters
+var songLuyenSheetHeader = ["Category",
+  "Fighter1 Name", "Fighter1 Rank","Fighter1 Club",
+  "Fighter2 Name", "Fighter2 Rank","Fighter2 Club",
+  "Fighter3 Name", "Fighter3 Rank","Fighter3 Club",
+  "Fighter4 Name", "Fighter4 Rank","Fighter4 Club",
+  "Fighter5 Name", "Fighter5 Rank","Fighter5 Club",
+  "Fighter6 Name", "Fighter6 Rank","Fighter6 Club",
+  "Fighter7 Name", "Fighter7 Rank","Fighter7 Club",
+  "Fighter8 Name", "Fighter8 Rank","Fighter8 Club",
+  "Fighter9 Name", "Fighter9 Rank","Fighter9 Club",
+  "Fighter10 Name", "Fighter10 Rank","Fighter10 Club",
+  "Fighter11 Name", "Fighter11 Rank","Fighter11 Club",
+  "Fighter12 Name", "Fighter12 Rank","Fighter12 Club",
+  "Fighter13 Name", "Fighter13 Rank","Fighter13 Club",
+  "Fighter14 Name", "Fighter14 Rank","Fighter14 Club",
+];
 
 function createsongLuyenList(){
   init();
@@ -8,14 +27,17 @@ function createsongLuyenList(){
   var songLuyenSheet = createOrReplaceSheet(songLuyenSheetName);
 
   var data = [];
+  var tournamentData = [];
 
   data.push(sourceValues[0]);
+  tournamentData.push(songLuyenSheetHeader);
 
   for(var i=0;i<songLuyenColumns.length;i++){
-    addTosongLuyenList(songLuyenColumns[i],/*songLuyenCategories[i],*/songLuyenTeamColumns[i], sourceValues, data);
+    addTosongLuyenList(songLuyenColumns[i],/*songLuyenCategories[i],*/songLuyenTeamColumns[i], sourceValues, data, tournamentData);
   }
 
   songLuyenSheet.getRange(1, 1, data.length, data[0].length).setValues(data);
+  createSerialLetter('15iKlL6Aw9-GPYCX1lDLPw3a5dWftqMV1DWICqFh559k','SongLuyen',tournamentData,false);
 }
 
 function sortByClubAndTeam(dataToSort, teamColumn){
@@ -25,12 +47,12 @@ function sortByClubAndTeam(dataToSort, teamColumn){
   for(var i=0;i<dataToSort.length;i++){
     var found = false;
     for(var j=0;j<clubs.length;j++){
-      if(clubs[j]==dataToSort[i][clubColumn]){
+      if(clubs[j]==dataToSort[i][clubColumnId]){
         found = true;
       }
     }
     if(!found){
-      clubs.push(dataToSort[i][0]);
+      clubs.push(dataToSort[i][clubColumnId]);
     }
   }
 
@@ -54,7 +76,7 @@ function sortByClubAndTeam(dataToSort, teamColumn){
   for(var i=0;i<clubs.length;i++){
     for(var j=0;j<teams.length;j++){
       for(var k=0;k<dataToSort.length;k++){
-        if(dataToSort[k][clubColumn] == clubs[i] && dataToSort[k][teamColumn] == teams[j]){
+        if(dataToSort[k][clubColumnId] == clubs[i] && dataToSort[k][teamColumn] == teams[j]){
           sorted.push(dataToSort[k]);
         }
       }
@@ -64,7 +86,7 @@ function sortByClubAndTeam(dataToSort, teamColumn){
   return sorted;
 }
 
-function addTosongLuyenList(column, /*categories,*/ teamColumn, sourceValues, data){
+function addTosongLuyenList(column, /*categories,*/ teamColumn, sourceValues, data, tournamentData){
   var categories = [];
   //get all categories
   for(var i=1;i<sourceValues.length;i++){
@@ -80,60 +102,48 @@ function addTosongLuyenList(column, /*categories,*/ teamColumn, sourceValues, da
   //todo group by synchro teams
 
   for(var i=0;i<categories.length;i++){
-    var titleMale = [];
-    var titleFemale = [];
-    var tmpDataMale = [];
-    var tmpDataFemale = [];
+    var tournamentDataEntry = [];
+    var title = [];
+    var tmpData = [];
     var dataEmpty = [];
     var clubs = [];
     //var teams = [];
 
     for(var j=0;j<data[0].length;j++){
-      titleMale.push([]);
-      titleFemale.push([]);
+      title.push([]);
       dataEmpty.push([]);
     }
 
-    titleMale[0]=categories[i]+' '+male;
-    titleFemale[0]=categories[i]+' '+female;
+    title[0]=categories[i];
 
     for(var j=1;j<sourceValues.length;j++){
       var category = sourceValues[j][column]
       if(category == categories[i]){
-        if(sourceValues[j][1]==male){
-          tmpDataMale.push(sourceValues[j]);
-        }else{
-          tmpDataFemale.push(sourceValues[j]);
-        }
-        
+          tmpData.push(sourceValues[j]);
       }
     }
 
     //sort by club and team
-    tmpDataMale = sortByClubAndTeam(tmpDataMale,teamColumn);
-    tmpDataFemale = sortByClubAndTeam(tmpDataFemale,teamColumn);
+    tmpData = sortByClubAndTeam(tmpData,teamColumn);
 
-    data.push(titleMale);
+    data.push(title);
+    tournamentDataEntry.push(title[0]);
     var lastTeam = null;
     var lastClub = null;
-    for(var j=0;j<tmpDataMale.length;j++){
-      if(j!=0 && lastClub != tmpDataMale[j][clubColumn]||lastTeam != tmpDataMale[j][teamColumn]){
+    for(var j=0;j<tmpData.length;j++){
+      if(j!=0 && lastClub != tmpData[j][clubColumnId]||lastTeam != tmpData[j][teamColumn]){
         data.push(dataEmpty);
       }
-      data.push(tmpDataMale[j]);
-      lastClub = tmpDataMale[j][clubColumn];
-      lastTeam = tmpDataMale[j][teamColumn];
+      data.push(tmpData[j]);
+
+      tournamentDataEntry.push(tmpData[j][nameColumnId]);
+      tournamentDataEntry.push(tmpData[j][rankColumnId]);
+      tournamentDataEntry.push(tmpData[j][clubColumnId]);
+      lastClub = tmpData[j][clubColumnId];
+      lastTeam = tmpData[j][teamColumn];
     }
     data.push(dataEmpty);
-    data.push(titleFemale);
-    for(var j=0;j<tmpDataFemale.length;j++){
-      if(j!=0 && lastClub != tmpDataFemale[j][clubColumn]||lastTeam != tmpDataFemale[j][teamColumn]){
-        data.push(dataEmpty);
-      }
-      data.push(tmpDataFemale[j]);
-      lastClub = tmpDataFemale[j][clubColumn];
-      lastTeam = tmpDataFemale[j][teamColumn];
-    }
-    data.push(dataEmpty);
+    
+    tournamentData.push(tournamentDataEntry);
   }
 }
