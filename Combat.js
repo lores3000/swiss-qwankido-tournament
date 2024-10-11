@@ -19,7 +19,7 @@ function createCombatLists(){
   tournamentData.push(combatHeader);
 
   for(var i=0;i<combatColumns.length;i++){
-    addToCombatList(combatColumns[i], combatCategories[i], sourceValues, data,tournamentData);
+    addToCombatList(combatColumns[i], /*combatCategories[i],*/ sourceValues, data,tournamentData);
   }
 
   //Zeilen und Spalten 'drehen' //falsch -> eine Reihe sollte ein Eintrag sein - braucht noch Spaltenkopf!
@@ -31,47 +31,41 @@ function createCombatLists(){
   createCombatSerialLetter(tournamentData);
 }
 
-function addToCombatList(column, categories, sourceValues, data, tournamentData){
+function addToCombatList(column, /*categories,*/ sourceValues, data, tournamentData){
+  var categories = [];
+  //get all categories
+  for(var i=1;i<sourceValues.length;i++){
+    var category = sourceValues[i][column]
+    if(categories.indexOf(category) == -1){
+      categories.push(category
+      );
+    }
+  }
+
   for(var i=0;i<categories.length;i++){
-    var titleMale = [];
-    var titleFemale = [];
-    var tmpDataMale = [];
-    var tmpDataFemale = [];
+    var title = [];
+    var tmpData = [];
     var dataEmpty = [];
     for(var j=0;j<data[0].length;j++){
-      titleMale.push([]);
-      titleFemale.push([]);
+      title.push([]);
       dataEmpty.push([]);
     }
-    titleMale[0]=categories[i]+' '+male;
-    titleFemale[0]=categories[i]+' '+female;
+    title = [categories[i]];
 
     for(var j=1;j<sourceValues.length;j++){
       var category = sourceValues[j][column]
       if(category == categories[i]){
-        if(sourceValues[j][1]==male){
-          tmpDataMale.push(sourceValues[j]);
-        }else{
-          tmpDataFemale.push(sourceValues[j]);
-        }
-        
+        tmpData.push(sourceValues[j]);
       }
     }
 
     //-> Name für anzeige in Turnier, unten noch Name + Team aller kämpfenden
-    data.push(titleMale);
-    for(var j=0;j<tmpDataMale.length;j++){
-      data.push(tmpDataMale[j]);
+    data.push(title);
+    for(var j=0;j<tmpData.length;j++){
+      data.push(tmpData[j]);
     }
     data.push(dataEmpty);
-    createTournamentData(categories[i]+' '+male, tmpDataMale, tournamentData);
-
-    data.push(titleFemale);
-    for(var j=0;j<tmpDataFemale.length;j++){
-      data.push(tmpDataFemale[j]);
-    }
-    data.push(dataEmpty);
-    createTournamentData(categories[i]+' '+female, tmpDataFemale, tournamentData);
+    createTournamentData(categories[i], tmpData, tournamentData);
   }
 }
 
