@@ -15,7 +15,7 @@ function generateAgeList(minimumAge, maximumAge, sourceSheet){
   var data = [];
   for (var i = 0; i< values.length ; i++){
     var row = values[i];
-    var age = row[6];
+    var age = row[4]; //todo get age column from config
     if(i==0){ //push title column
       data.push(values[i])
     }else if(age >= minimumAge && age <= maximumAge){

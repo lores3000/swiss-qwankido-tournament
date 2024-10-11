@@ -1,5 +1,8 @@
 var configurationSheetName = 'Konfiguration';
+
+var sourceSheetFile = '';
 var sourceSheetName = 'SwissCup2024';
+var destinationSheetName = 'QKD Generiert'
 var intermediateSheetName = 'Teilnehmer';
 var quyenSheetName = 'Quyen';
 var quyenSynchroSheetName = 'QuyenSynchro'
@@ -7,10 +10,12 @@ var combatSheetName = 'Combat'
 var combatTournamentSheetName = 'Combat Turnier'
 var songLuyenSheetName = 'Song Luyen'
 
+var startrowforsourcedata = 5; //erste Zeile der 'Nutzdaten'
+
 var male = 'männlich';
 var female = 'weiblich';
 
-var sourceSheetTournamentDateCell = 'B2';
+var sourceSheetTournamentDateCell = 'B2'; //wo ist das Datum gespeichert
 
 var ageColum = 'G'
 var birthdateColum = 'C'
@@ -105,9 +110,20 @@ var combatAdultCategories = [
   //todo missing ?
 ];
 
-var combatCategories = [combatKidsCategories,combatAdultCategories]
+var combatWeaponsCategories = [
+  'Long Gian (13 – 15 Jahre Mädchen & Jungs)',
+  'Bong (13 – 15 Jahre Mädchen & Jungs)',
+  'Interwaffen (ab 16 Jahre Frauen und Männer)'
+]
 
-var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+var combatCategories = [combatKidsCategories,combatAdultCategories, combatWeaponsCategories]
+
+var appSheet = SpreadsheetApp.getActiveSpreadsheet(); //app stuff
+var appFile = DriveApp.getFileById(appSheet.getId());
+var appFolder = appFile.getParents().next();
+//var sourceSheet = SpreadsheetApp.getActiveSpreadsheet(); //source
+var spreadsheet ;//= SpreadsheetApp.getActiveSpreadsheet(); //destination
+
 
 var initialized = false;
 
@@ -119,16 +135,21 @@ function fillArray(sourceData, column, startRow){
   return array;
 }
 
-function init(){
+function init(replacesheet){
   if(initialized) return;
-  var config = spreadsheet.getSheetByName(configurationSheetName).getDataRange().getValues();
-  configurationSheetName = config[1][1]
-  sourceSheetTournamentDateCell = config[1][2];
 
-  ageColum = config[1][3]
-  birthdateColum = config[1][4]
-  nameColumn = config[1][5]
-  clubColumn = config[1][6]
+  var config = appSheet.getSheetByName(configurationSheetName).getDataRange().getValues();
+
+  var column = 0;
+  sourceSheetFile = config[1][column++]
+  sourceSheetName = config[1][column++]
+  destinationSheetName = config[1][column++]
+  sourceSheetTournamentDateCell = config[1][column++];
+
+  ageColum = config[1][column++]
+  birthdateColum = config[1][column++]
+  nameColumn = config[1][column++]
+  clubColumn = config[1][column++]
 
   var startRow = 5;
   quyenColumns = fillArray(config, 0, startRow);
@@ -151,6 +172,7 @@ function init(){
   combatTeamColumns = fillArray(config, 1, startRow);
   combatKidsCategories = fillArray(config, 2, startRow);
   combatAdultCategories = fillArray(config, 3, startRow);
+  combatWeaponsCategories = fillArray(config, 4, startRow);
 
   var startRow = 40;
   songLuyenColumns = fillArray(config, 0, startRow);
@@ -160,6 +182,19 @@ function init(){
   songLuyenKidsCategories = fillArray(config, 3, startRow);
   songLuyenAdultCategories = fillArray(config, 4, startRow);
   songLuyenWeaponsCategories = fillArray(config, 5, startRow);
-  initialized = true;
 
+
+  var existing_spreadsheet = appFolder.getFilesByName(destinationSheetName);
+  if(!existing_spreadsheet.hasNext()){
+    var resource = {
+      title: destinationSheetName,
+      mimeType: MimeType.GOOGLE_SHEETS,
+      parents: [{ id: appFolder.getId() }]
+    };
+    Drive.Files.insert(resource);
+  }
+
+  spreadsheet = SpreadsheetApp.open(appFolder.getFilesByName(destinationSheetName).next());
+
+  initialized = true;
 }

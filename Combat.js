@@ -1,6 +1,7 @@
 //-> wenn gerade Anzahl und mindestens ein 2-er Team vorhanden ist wird der Teamname angezeigt nicht der Kämpfername
 
 var maxFightersPerGroup = 5;
+var combatHeader = ["Category","Fight1 Fighter1","Fight1 Fighter2","Fight2 Fighter1","Fight2 Fighter2","Fight3 Fighter1","Fight3 Fighter2","Fight4 Fighter1","Fight4 Fighter2","Fight5 Fighter1","Fight5 Fighter2","Fight6 Fighter1","Fight6 Fighter2","Fight7 Fighter1","Fight7 Fighter2","Fight8 Fighter1","Fight8 Fighter2","Fight9 Fighter1","Fight9 Fighter2","Fight10 Fighter1","Fight10 Fighter2","Combatant1","Combatant2","Combatant3","Combatant4","Combatant5","Combatant6","Combatant7","Combatant8","Combatant9","Combatant10"]
 
 function createCombatLists(){
   init();
@@ -15,15 +16,19 @@ function createCombatLists(){
   var tournamentData = [];
 
   data.push(sourceValues[0]);
+  tournamentData.push(combatHeader);
 
   for(var i=0;i<combatColumns.length;i++){
     addToCombatList(combatColumns[i], combatCategories[i], sourceValues, data,tournamentData);
   }
 
-  tournamentData = tournamentData[0].map((_, i) => tournamentData.map(row => row[i]));
+  //Zeilen und Spalten 'drehen' //falsch -> eine Reihe sollte ein Eintrag sein - braucht noch Spaltenkopf!
+  //tournamentData = tournamentData[0].map((_, i) => tournamentData.map(row => row[i]));
 
   combatSheet.getRange(1, 1, data.length, data[0].length).setValues(data);
   combatTournamentSheet.getRange(1, 1, tournamentData.length, tournamentData[0].length).setValues(tournamentData);
+
+  createCombatSerialLetter(tournamentData);
 }
 
 function addToCombatList(column, categories, sourceValues, data, tournamentData){
@@ -75,7 +80,7 @@ function createTournamentData(category, fightersIn, tournamentData){
   var teams = [];
 
   var hasTeams = false;
-  var column = tournamentData.length-1;
+  var row = tournamentData.length-1;
 
   for(var i=0;i<fightersIn.length;i++){
     fighters.push([fightersIn[i][3],[fightersIn[i][0]+' - '+fightersIn[i][3]]]); //name & displayname for list
@@ -173,19 +178,18 @@ function createTournamentData(category, fightersIn, tournamentData){
       }
     }
 
-    var rows = [];
+    var rowEntries = [];
 
-    rows.push([category+' Gruppe'+(i+1)])
+    rowEntries.push([category+' Gruppe'+(i+1)])
     var fightIndex = 0;
     for(;fightIndex<fights.length;fightIndex++){
-      rows.push([fights[fightIndex][0][0]]);
-      rows.push([fights[fightIndex][1][0]]);
-      rows.push([null]);
+      rowEntries.push([fights[fightIndex][0][0]]);
+      rowEntries.push([fights[fightIndex][1][0]]);
     }
     
     //fill empty fights
-    for(;rows.length<1+10*3;){//title + 3 lines per fight max 10 fights
-      rows.push([null]);
+    for(;rowEntries.length<1+10*2;){//title + 2 columns per fight max 10 fights
+      rowEntries.push([null]);
     }
 
     //create list of fighters in round
@@ -195,7 +199,7 @@ function createTournamentData(category, fightersIn, tournamentData){
         var fighter = group[fighterIndex];
 
         for(var fighterIndex2=0;fighterIndex2<fighter[1].length;fighterIndex2++){
-          rows.push([fighter[1][fighterIndex2]]);
+          rowEntries.push([fighter[1][fighterIndex2]]);
           fighterLines ++;
         }
       }
@@ -203,13 +207,13 @@ function createTournamentData(category, fightersIn, tournamentData){
 
     
     //fill empty fighters
-    for(;rows.length<1+10*3+5*3;){//title + 3 lines per fight max 10 fights
-      rows.push([null]);
+    for(;rowEntries.length<1+10*2+5*2;){//title + 2 lines per fight max 10 fights + max 2 fighters per team
+      rowEntries.push([null]);
     }
 
     tournamentData.push([]);
-    column++;
-    tournamentData[column]=rows;
+    row++;
+    tournamentData[row]=rowEntries;
   }
 
   if(groupCount > 1){
@@ -228,15 +232,149 @@ function createTournamentData(category, fightersIn, tournamentData){
     for(var fightIndex = 0;fightIndex<fights.length;fightIndex++){
       rows.push([fights[fightIndex][0]]);
       rows.push([fights[fightIndex][1]]);
-      rows.push([null]);
     }
 
     //fill empty rows
-    for(;rows.length<1+10*3+5*3;){//title + 3 lines per fight max 10 fights
+    for(;rows.length<1+10*2+5*2;){//title + 3 lines per fight max 10 fights
       rows.push([null]);
     }
     tournamentData.push([]);
-    column++;
-    tournamentData[column]=rows;
+    row++;
+    tournamentData[row]=rows;
   }
+}
+
+function copyBody(source, destination){
+
+    var totalElements = source.getNumChildren();
+    for( var j = 0; j < totalElements; ++j ) {
+      var element = source.getChild(j).copy();
+      var type = element.getType();
+      if( type == DocumentApp.ElementType.PARAGRAPH )
+        destination.appendParagraph(element);
+      else if( type == DocumentApp.ElementType.TABLE )
+        destination.appendTable(element);
+      else if( type == DocumentApp.ElementType.LIST_ITEM )
+        destination.appendListItem(element);
+      else
+        throw new Error("According to the doc this type couldn't appear in the body: "+type);
+    }
+
+
+}
+/*
+//from table
+function createCombatSerialLetter(tournamentData){
+
+  const templateCombatDoc = DriveApp.getFileById('1QRNL9nPlNr1a5-j8eti2R1I4itmEDirY1IPlhqtQrT4');
+
+  var files = appFolder.getFilesByName("Kämpfe");
+  while (files.hasNext()) {//If there is another element in the iterator
+    var thisFile = files.next();
+    thisFile.setTrashed(true);
+  };
+
+  const newCombatDoc = templateCombatDoc.makeCopy(appFolder);
+  newCombatDoc.setName("Kämpfe");
+
+  var columnHeaders = tournamentData[0];
+  
+
+  const doc = SpreadsheetApp.openById(newCombatDoc.getId());
+  var sheet = doc.getSheets()[0];
+
+  var dataRange = sheet.getDataRange();
+  //var activeRange = sheet.getActiveRange();
+  //var dataRangeRows = dataRange.getNumRows();
+  //var activeRangeRows = activeRange.getNumRows();
+
+  var sourceRange = dataRange;// sheet.getRange(1,1,52,9);
+  var rows = sourceRange.getNumRows();
+  var columns = sourceRange.getNumColumns();
+  var startRow = 1;
+
+  for(var row=1;row<tournamentData.length;row++){
+    var type = typeof(startRow);
+
+    sourceRange = sheet.getRange(startRow, 1, rows, columns);
+    if(row!= tournamentData.length-1){
+      sourceRange.copyTo(sheet.getRange(startRow+rows, 1, rows, columns));
+    }
+
+//debug only...
+    //var sourceRange = sheet.getDataRange();// sheet.getRange(1,1,52,9);
+    var rowi = sourceRange.getRow();
+    var coli = sourceRange.getColumn();
+    rows = sourceRange.getNumRows();
+    columns = sourceRange.getNumColumns();
+
+    var values = sourceRange.getValues();
+
+    for(var column=0;column<columnHeaders.length;column++){
+      var search = '{'+columnHeaders[column]+'}';
+      var rowdata = tournamentData[row];
+      
+      var replace = rowdata[column]? rowdata[column] : "";
+
+      for(var searchrow=0;searchrow<values.length;searchrow++){
+        for(var searchcolumn=0;searchcolumn<values[searchrow].length;searchcolumn++){
+          var value = values[searchrow][searchcolumn];
+          if(values[searchrow][searchcolumn] == search){
+            values[searchrow][searchcolumn] = replace;
+          }
+        }
+      }
+
+      sourceRange.setValues(values);  
+    }
+
+    startRow += rows;
+  }
+    //copyBody(replacementBody, body);
+}*/
+
+//from page
+function createCombatSerialLetter(tournamentData){
+
+  const templateCombatDoc = DriveApp.getFileById('1Pp8Mi8YfxQ9VOLXX9z7AZOxssaHucmHbi9FC51kZzoI');
+
+  var files = appFolder.getFilesByName("Kämpfe");
+  while (files.hasNext()) {//If there is another element in the iterator
+    var thisFile = files.next();
+    thisFile.setTrashed(true);
+  };
+
+  const newCombatDoc = templateCombatDoc.makeCopy(appFolder);
+  newCombatDoc.setName("Kämpfe");
+
+  var columnHeaders = tournamentData[0];
+  
+
+  const doc = DocumentApp.openById(newCombatDoc.getId());
+  const body = doc.getBody();
+
+  var bodyCopy = body.copy();
+  body.clear();
+
+  //body.clear();
+  for(var row=1;row<tournamentData.length;row++){
+    var replacementBody = bodyCopy.copy();
+
+    for(var column=0;column<columnHeaders.length;column++){
+      var search = columnHeaders[column];
+      var rowdata = tournamentData[row];
+      
+      var replace = rowdata[column]? rowdata[column] : "";
+
+      replacementBody.replaceText('{'+search+'}', replace);  
+    }
+
+    if(row!= tournamentData.length-1){
+      replacementBody.appendPageBreak();
+    }
+
+    copyBody(replacementBody, body);
+  }
+
+  doc.saveAndClose();
 }
