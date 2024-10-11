@@ -131,19 +131,22 @@ function addTosongLuyenList(column, /*categories,*/ teamColumn, sourceValues, da
     var lastTeam = null;
     var lastClub = null;
     for(var j=0;j<tmpData.length;j++){
-      if(j!=0 && lastClub != tmpData[j][clubColumnId]||lastTeam != tmpData[j][teamColumn]){
+      if((j%2)!=0 && (lastClub != tmpData[j][clubColumnId]||lastTeam != tmpData[j][teamColumn])){
         data.push(dataEmpty);
+        tournamentDataEntry.push([]);
+        tournamentDataEntry.push([]);
+        tournamentDataEntry.push([]);
       }
       data.push(tmpData[j]);
 
       tournamentDataEntry.push(tmpData[j][nameColumnId]);
       tournamentDataEntry.push(tmpData[j][rankColumnId]);
-      tournamentDataEntry.push(tmpData[j][clubColumnId]);
+      tournamentDataEntry.push(tmpData[j][clubColumnId]+' - '+tmpData[j][teamColumn]);
       lastClub = tmpData[j][clubColumnId];
       lastTeam = tmpData[j][teamColumn];
     }
     data.push(dataEmpty);
-    
+
     tournamentData.push(tournamentDataEntry);
   }
 }
