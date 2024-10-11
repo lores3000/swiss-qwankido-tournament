@@ -97,10 +97,10 @@ function createTournamentData(category, teamColumn, fightersIn, tournamentData){
     for(var i=0;i<fightersIn.length;i++){
       var ignore = false;
       for(var j=0;j<teams.length;j++){
-        if(teams[j][0] == fightersIn[i][teamColumn]){
+        if(teams[j][0] == fightersIn[i][clubColumnId]){
           hasTeams = true;
           membercount[j]+=1;
-          teams[j][1].push(fighters[i][1][teamColumn]);
+          teams[j][1].push(fighters[i][1]);
           ignore = true;
         }
       }
@@ -188,15 +188,12 @@ function createTournamentData(category, teamColumn, fightersIn, tournamentData){
     }
 
     //create list of fighters in round
-    var fighterLines=0;
     if(fighters.length > 0){
       for(var fighterIndex=0;fighterIndex<group.length;fighterIndex++){
         var fighter = group[fighterIndex];
 
-        for(var fighterIndex2=0;fighterIndex2<fighter[1].length;fighterIndex2++){
-          rowEntries.push([fighter[1][fighterIndex2]]);
-          fighterLines ++;
-        }
+        rowEntries.push([fighter[1]]);
+      
       }
     }
 
