@@ -23,7 +23,7 @@ function calculateAgeInYears(intermediateSheet){
 
   //correct age
   for(var i=0;i<sourceValues.length;i++){
-    sourceValues[i][0] = '=DATEDIF('+birthdateColum+(i+2)+','+sourceSheetName+'!'+sourceSheetTournamentDateCell+',"Y")';
+    sourceValues[i][0] = '=DATEDIF('+birthdateColum+(i+2)+',\''+sourceSheetName+'\'!'+sourceSheetTournamentDateCell+',"Y")';
   }
   intermediateSheet.getRange(ageColum+2+':'+ageColum+rows).setFormulas(sourceValues);
 }
@@ -42,13 +42,13 @@ function createSerialLetter(templateId, documentName, tournamentData, addExtraPa
 
   const templateCombatDoc = DriveApp.getFileById(templateId);
 
-  var files = appFolder.getFilesByName(documentName);
+  var files = destFolder.getFilesByName(documentName);
   while (files.hasNext()) {//If there is another element in the iterator
     var thisFile = files.next();
     thisFile.setTrashed(true);
   };
 
-  const newCombatDoc = templateCombatDoc.makeCopy(appFolder);
+  const newCombatDoc = templateCombatDoc.makeCopy(destFolder);
   newCombatDoc.setName(documentName);
 
   var columnHeaders = tournamentData[0];

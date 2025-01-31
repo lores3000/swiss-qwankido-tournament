@@ -43,92 +43,19 @@ var combatTeamColumns = ['J','Q']
 var songLuyenColumns = [12,19,28];//['M','T','AC'];
 var songLuyenTeamColumns = [13,20,30];//['N','U','AE'];
 var songLuyenWeaponColumns = [null,null,29];//[null,null,'AD']
-//unused atm: 'E', 'F', 'AF'
-/*
-var quyenKidsCategories = []/*['A (7 – 8 Jahre bis 2. Cap Rot)',
-  'B (9 – 10 Jahre bis 2. Cap Rot)',
-  'C (11 – 12 Jahre bis 2. Cap Rot)',
-  //todo missing D
-  'D (7 – 8 Jahre ab 3. Cap Rot)',
-  'E (9 – 10 Jahre ab 3. Cap Rot)',
-  'F (11 – 12 Jahre ab 3. Cap Rot)',
-];*//*
-var quyenAdultCategories = ['Erwachsene A (ab 16 Jahre bis 4. Cap Blau nur Männer)',
-  'Erwachsene B (ab 16 Jahre bis 4. Cap Blau nur Frauen)',
-  'Erwachsene C (ab 18 Jahre ab CN nur Männer)',
-  'Erwachsene D (ab 18 Jahre ab CN nur Frauen)',
-  'Junior A (13 – 15 Jahre bis 4. Cap Blau nur Jungs)',
-  //todo missing B
-];
-var quyenWoodWeaponsCategories = ['Erwachsene H (ab 16 Jahre Frauen & Männer)',
-  //todo missing ?
-];
-var quyenSteelWeaponsCategories = ['Erwachsene S (ab 16 Jahre Frauen & Männer)',
-  //todo missing ?
-];
-//todo mixed gender categories -> manually
-var quyenCategories = [quyenKidsCategories,quyenAdultCategories,quyenWoodWeaponsCategories,quyenSteelWeaponsCategories]
-
-var quyenSynchroKidsCategories = ['Kid (9 – 12 Jahre ab 1. Cap Rot)',
-];
-var quyenSynchroAdultCategories = ['Junioren  (ab 13 Jahre)',
-  'Erwachsene (ab 16 Jahren)',
-  //todo missing B
-];
-var quyenSynchroWeaponsCategories = ['todo'
-  //todo missing ?
-];
-//todo mixed gender categories -> manually
-var quyenSynchroCategories = [quyenSynchroKidsCategories,quyenSynchroAdultCategories,quyenSynchroWeaponsCategories]
-
-var songLuyenKidsCategories = ['Song Luyên – QKD (9 – 12 Jahre)',
-];
-var songLuyenAdultCategories = ['Song Luyên – QKD (13 – 15 Jahre Mädchen & Jungs)',
-  'Song Luyên – QKD (ab 16 Jahre Frauen & Männer)',
-  //todo missing B
-];
-var songLuyenWeaponsCategories = ['Song Luyên – CVD (ab 16 Jahre Frauen & Männer)'
-  //todo missing ?
-];
-var songLuyenCategories = [songLuyenKidsCategories,songLuyenAdultCategories,songLuyenWeaponsCategories]
-
-var combatKidsCategories = [
-'Combat A (7 – 8 Jahre Alle nur Mädchen)',
-'Combat B (9 – 10 Jahre bis 2. Cap Rot nur Mädchen)',
-'Combat C (9 – 10 Jahre ab 3. Cap Rot nur Mädchen)',
-'Combat D (11 – 12 Jahre bis 2. Cap Rot nur Mädchen)',
-'Combat E (11 – 12 Jahre ab 3. Cap Rot nur Mädchen)',
-'Combat F (7 – 8 Jahre Alle nur Knaben)',
-'Combat G (9 – 10 Jahre bis 2. Cap Rot nur Knaben)',
-//todo missing H
-'Combat I (11 – 12 Jahre bis 2. Cap Rot nur Knaben)',
-'Combat J (11 – 12 Jahre ab 3. Cap Rot nur Knaben)',
-  //todo missing ?
-];
-
-var combatAdultCategories = [
-  'Erwachsene A (ab 16 Jahre bis 3. Cap nur Frauen)',
-  'Erwachsene B (ab 16 Jahre bis 3. Cap nur Männer)',
-  'Erwachsene C (ab 16 Jahre Ab 4. Cap nur Frauen)',
-  'Erwachsene D (ab 16 Jahre Ab 4. Cap nur Männer)',
-  //todo missing Junior A
-  'Junior B (13 – 15 Jahre bis 3. Cap nur Jungs)',
-  //todo missing ?
-];
-
-var combatWeaponsCategories = [
-  'Long Gian (13 – 15 Jahre Mädchen & Jungs)',
-  'Bong (13 – 15 Jahre Mädchen & Jungs)',
-  'Interwaffen (ab 16 Jahre Frauen und Männer)'
-]
-
-var combatCategories = [combatKidsCategories,combatAdultCategories, combatWeaponsCategories]
-*/
 var appSheet = SpreadsheetApp.getActiveSpreadsheet(); //app stuff
 var appFile = DriveApp.getFileById(appSheet.getId());
 var appFolder = appFile.getParents().next();
-//var sourceSheet = SpreadsheetApp.getActiveSpreadsheet(); //source
-var spreadsheet ;//= SpreadsheetApp.getActiveSpreadsheet(); //destination
+
+//create destination folder if it does not exist
+var datestring = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd.MM.yyyy");
+var folders = appFolder.getFoldersByName('QKD Generiert '+datestring);
+if(!folders.hasNext()){
+  appFolder.createFolder('QKD Generiert '+datestring);
+}
+var destFolder = appFolder.getFoldersByName('QKD Generiert '+datestring).next();
+
+var spreadsheet;
 
 
 var initialized = false;
@@ -152,7 +79,7 @@ function init(replacesheet){
   destinationSheetName = config[1][column++]
   sourceSheetTournamentDateCell = config[1][column++];
 
-  ageColum = config[1][column++]
+  ageColumName = config[1][column++]
   birthdateColum = config[1][column++]
   nameColumn = config[1][column++]
   clubColumn = config[1][column++]
@@ -194,17 +121,17 @@ function init(replacesheet){
   songLuyenWeaponsCategories = fillArray(config, 5, startRow);
 
 
-  var existing_spreadsheet = appFolder.getFilesByName(destinationSheetName);
+  var existing_spreadsheet = destFolder.getFilesByName(destinationSheetName);
   if(!existing_spreadsheet.hasNext()){
     var resource = {
       title: destinationSheetName,
       mimeType: MimeType.GOOGLE_SHEETS,
-      parents: [{ id: appFolder.getId() }]
+      parents: [{ id: destFolder.getId() }]
     };
     Drive.Files.insert(resource);
   }
 
-  spreadsheet = SpreadsheetApp.open(appFolder.getFilesByName(destinationSheetName).next());
+  spreadsheet = SpreadsheetApp.open(destFolder.getFilesByName(destinationSheetName).next());
 
   initialized = true;
 }
